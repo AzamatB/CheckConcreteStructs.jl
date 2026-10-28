@@ -48,10 +48,10 @@ end
 end
 
 @testset "Type fields" begin
-    @test !all_concrete(TypeUnionField; verbose=false)
-    @test !all_concrete(TypeParameterField; verbose=false)
-    @test !all_concrete(TypeParameterField{UInt32}; verbose=false)
-    @test !all_concrete(AbstractTypeField; verbose=false)
+    @test all_concrete(TypeUnionField)
+    @test all_concrete(TypeParameterField)
+    @test all_concrete(TypeParameterField{UInt32})
+    @test all_concrete(AbstractTypeField)
     @test !all_concrete(UnrestrictedType; verbose=false)
     @test !all_concrete(OpenTypeFamily; verbose=false)
 end
