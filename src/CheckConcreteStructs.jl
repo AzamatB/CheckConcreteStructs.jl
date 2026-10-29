@@ -215,13 +215,16 @@ end
 recursive_isconcretetype(T) = recursive_isconcretetype(T, Set{Any}())
 
 function recursive_isconcretetype(T, seen::Set{Any})
+    T === Union{} && return false
     isa(T, UnionAll) && return false
     isa(T, TypeVar) && return true  # key modification
     isconcretetype(T) && return true
-    # A Type{X} field can only hold X (up to type equality), so inference knows what
-    # it holds even though Julia classifies Type{X} as abstract. Open families such
-    # as Type{<:Real} were rejected as UnionAll above.
-    isa(T, DataType) && T.name === Base.unwrap_unionall(Type).name && return true
+    # Check Type{X} by the same rules as X: allow struct parameters and concrete
+    # types, but reject abstract types such as Real. Open families such as
+    # Type{<:Real} were rejected as UnionAll above.
+    if isa(T, DataType) && T.name === Base.unwrap_unionall(Type).name
+        return recursive_isconcretetype(only(T.parameters), seen)
+    end
     isabstracttype(T) && return false
     # A recursive parametric field can lead back to a type whose remaining fields
     # are already being checked. Traverse each type once, without skipping those
